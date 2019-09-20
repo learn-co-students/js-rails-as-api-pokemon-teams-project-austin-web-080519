@@ -18,7 +18,6 @@ fetch(TRAINERS_URL)
         add.innerText = 'Add Pokémon';
         add.setAttribute('data-trainer-id', trainer.id);
         add.addEventListener('click', function(){
-            console.log(trainer)
             const configurationObject = {
                 method: "POST",
                 headers: {
@@ -31,24 +30,37 @@ fetch(TRAINERS_URL)
             };
             
             function createPokemon(){
-              console.log('add');
-                console.log(POKEMONS_URL)
-                console.log(configurationObject)
-              fetch(POKEMONS_URL, configurationObject)
-              .then(response => {
-                  console.log('why!!!!')
-                  console.log(response);
-                //   response.json();
-              })
-              .then(data => {
-                  console.log(data)
-                  return data  
+              return fetch('http://localhost:3000/pokemons/', configurationObject)
+              .then(response => response.json())
+              .then(function(json){
+                  console.log(json)
+                  let li = document.createElement('li');
+                  li.innerText = `${json.nickname} the ${json.species}`;
+                  let release = document.createElement('button');
+                  release.innerText = "Release"
+                  li.appendChild(release);
+                  pokelist.appendChild(li);
+                  release.addEventListener('click', function(){
+                    let delconfig = {
+                        method: "DELETE",
+                        headers: {
+                          "Content-Type": "application/json"
+                        }
+                    }
+                    function releasePokemon() {
+                      return fetch(`${BASE_URL}/pokemons/${json.id}`, delconfig)
+                      .then(response => response.json())
+                      .then(json => console.log(json))
+                      .catch(error => console.log(error));
+                    }
+                    releasePokemon();
+                    pokelist.removeChild(li);
+                  })
               })
               .catch(error => console.log(error));
             }
 
-            if(trainer.pokemons.length < 6) {
-              console.log("invoke createPokemon()")  
+            if(pokelist.querySelectorAll('li').length < 6) {
               createPokemon();
             }
             else {
@@ -61,12 +73,14 @@ fetch(TRAINERS_URL)
         card.appendChild(pokelist);
         main.appendChild(card);
         for(const pokemon of trainer.pokemons){
-            let li = document.createElement('li');
-            li.innerText = `${pokemon.nickname} the ${pokemon.species}`;
-            let release = document.createElement('button');
-            release.innerText = "Release"
-            li.appendChild(release);
-            release.addEventListener('click', function(){
+            function addPokemon(){
+              let li = document.createElement('li');
+              li.innerText = `${pokemon.nickname} the ${pokemon.species}`;
+              let release = document.createElement('button');
+              release.innerText = "Release"
+              li.appendChild(release);
+              pokelist.appendChild(li);
+              release.addEventListener('click', function(){
                 let delconfig = {
                     method: "DELETE",
                     headers: {
@@ -74,17 +88,17 @@ fetch(TRAINERS_URL)
                     }
                 }
                 function releasePokemon() {
-                  console.log('del');
-                  console.log(pokemon)
                   return fetch(`${BASE_URL}/pokemons/${pokemon.id}`, delconfig)
                   .then(response => response.json())
                   .then(json => console.log(json))
                   .catch(error => console.log(error));
                 }
                 releasePokemon();
-            })
-            pokelist.appendChild(li);
+                pokelist.removeChild(li);
+              })
+            }
+            addPokemon();
         }
     }
 })
-.catch(error => console.log("o no"));
+.catch(error => console.log(error));
