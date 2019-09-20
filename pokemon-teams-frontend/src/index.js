@@ -90,8 +90,8 @@ document.addEventListener("DOMContentLoaded", event => {
             addPokemonBtn.innerText = "Add Pokemon";
             
             addPokemonBtn.addEventListener("click", event => {
-                
-                if (trainer.pokemons.length >= 6){
+                const parentUl = document.querySelector(`[trainer-list-id="${trainer.id}"]`)
+                if (parentUl.childNodes.length >= 6){
                     return;
                 } else {
                     addPokemon(trainer);
